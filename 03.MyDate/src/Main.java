@@ -1,35 +1,27 @@
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.text.NumberFormat;
-import java.
-
 public class Main {
     public static void main(String[] args) {
-        BigDecimal principal = BigDecimal.valueOf(1000.0);
-        BigDecimal rate = BigDecimal.valueOf(0.05);
-        System.out.printf("%s%20s%n", "Year", "Amount on deposit");
-        // calcula quantidade de depósito para cada um dos dez anos
-        for (int year = 1; year <= 10; year++)
-        {
-            BigDecimal amount = principal.multiply(rate.add(BigDecimal.ONE).pow(year));
-            System.out.printf("%4d%20s%n", year, NumberFormat.getCurrencyInstance().format(amount));
-        }
+        // Criando instância de MyDate
+        MyDate date = new MyDate(2022, 3, 6);
 
-        BigDecimal result = principal.divide(BigDecimal.valueOf(3), MathContext.DECIMAL128);
-        System.out.println("Divided value: " + result);
+        // Exibindo a data inicial
+        System.out.println("Data Inicial: " + date);
+
+        // Realizando operações de adição e subtração de anos, meses, semanas e dias
+        date.plusYears(1);
+        date.minusMonths(2);
+        date.plusWeeks(3);
+        date.minusDays(15);
+
+        // Exibindo a data após as operações
+        System.out.println("Data Após Operações: " + date);
+
+        // Comparando datas
+        MyDate otherDate = new MyDate(2022, 3, 6);
+        int comparisonResult = MyDate.compareDate(date, otherDate);
+        System.out.println("Resultado da Comparação: " + comparisonResult);
+
+        // Exibindo a data formatada
+        String formattedDate = date.toString(" - ", "dd - mm - yy");
+        System.out.println("Data Formatada: " + formattedDate);
     }
 }
-
-//        var myDate = new MyDate(2023,5,28);
-//        var date = LocalDate.of(2023,5,28);
-//        int years = 70;
-//        myDate.minusDays(years);
-//        date = date.minusDays(years);
-//        date = date.plusMonths(5);
-//
-//        System.out.println(myDate);
-//        System.out.println(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-//        System.out.println(Integer.MAX_VALUE * 30L);
-//
-//        var book = Book.JHTP;
-//        System.out.println(book.getTitle());

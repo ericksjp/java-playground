@@ -1,6 +1,5 @@
 package view;
 
-import Utils.ClearConsole;
 import model.Categoria;
 import model.Produto;
 
