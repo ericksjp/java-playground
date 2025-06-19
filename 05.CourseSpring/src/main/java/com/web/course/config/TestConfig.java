@@ -1,6 +1,5 @@
 package com.web.course.config;
 
-import java.lang.constant.DirectMethodHandleDesc.Kind;
 import java.time.Instant;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import com.web.course.entities.Category;
 import com.web.course.entities.Order;
 import com.web.course.entities.OrderItem;
 import com.web.course.entities.OrderStatus;
+import com.web.course.entities.Payment;
 import com.web.course.entities.Product;
 import com.web.course.entities.User;
 import com.web.course.repositories.CategoryRepository;
@@ -72,5 +72,10 @@ public class TestConfig implements CommandLineRunner {
         OrderItem oi3 = new OrderItem(o2, p3, 2, p3.getPrice());
         OrderItem oi4 = new OrderItem(o3, p5, 2, p5.getPrice());
         orderItemRepository.saveAll(List.of(oi1, oi2, oi3, oi4));
+
+        Payment pay1 = new Payment(null, Instant.parse("2019-06-20T21:53:07Z"), o1);
+		o1.setPayment(pay1);
+
+        orderRepository.save(o1);
     }
 }
