@@ -32,12 +32,9 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException(id);
-        }
-
         try {
-            userRepository.deleteById(id);
+            boolean result = userRepository.deleteByIdCustom(id) > 0;
+            if (!result) throw new ResourceNotFoundException(id);
         } catch (DataIntegrityViolationException e) {
             throw new DatabaseException(e.getMessage());
         }
