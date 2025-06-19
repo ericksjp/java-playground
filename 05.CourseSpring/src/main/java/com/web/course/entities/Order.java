@@ -120,4 +120,8 @@ public class Order implements Serializable {
 			return false;
 		return true;
 	}
+
+    public Double getTotal() {
+        return items.stream().reduce(0.0, (subtotal, element) -> subtotal + element.getSubTotal(), Double::sum);
+    }
 }
