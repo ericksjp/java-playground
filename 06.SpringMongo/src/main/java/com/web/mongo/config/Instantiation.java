@@ -2,6 +2,7 @@ package com.web.mongo.config;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -37,5 +38,8 @@ public class Instantiation implements CommandLineRunner {
         Post post2 = new Post(null, Instant.parse("2024-10-02T12:00:00Z"), "Bom dia", "Acordei feliz hoje!", new AuthorDTO(maria));
 
         postRepository.saveAll(List.of(post1, post2));
+        maria.getPosts().addAll(Set.of(post1, post2));
+
+        userRepository.save(maria);
     }
 }
