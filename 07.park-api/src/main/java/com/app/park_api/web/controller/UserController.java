@@ -1,5 +1,7 @@
 package com.app.park_api.web.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,4 +40,11 @@ public class UserController {
         user = userService.udpatePassword(id, user.getPassword());
         return ResponseEntity.ok().body(user);
     }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAll() {
+        List<User> users = userService.findAll();
+        return ResponseEntity.ok().body(users);
+    }
+
 }
