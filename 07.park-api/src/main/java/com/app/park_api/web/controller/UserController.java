@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.park_api.entity.User;
 import com.app.park_api.service.UserService;
 import com.app.park_api.web.dto.UserCreateDTO;
+import com.app.park_api.web.dto.UserPasswordDTO;
 import com.app.park_api.web.dto.UserResponseDTO;
 import com.app.park_api.web.dto.mapper.UserMapper;
 
@@ -40,9 +41,9 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> updatePassword(@PathVariable Long id, @RequestBody User user) {
-        user = userService.udpatePassword(id, user.getPassword());
-        return ResponseEntity.ok().body(user);
+    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody UserPasswordDTO dto) {
+        userService.udpatePassword(id, dto.getCurrentPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
