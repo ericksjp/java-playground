@@ -26,15 +26,24 @@ public class UserService {
                 () -> new RuntimeException("User not found with id: " + id));
     }
 
-    @Transactional
-    public User udpatePassword(Long id, String password) {
-        User user = findById(id);
-        user.setPassword(password);
-        return user;
-    }
-
     @Transactional(readOnly = true)
     public List<User> findAll() {
         return repository.findAll();
+    }
+
+    @Transactional
+    public User udpatePassword(Long id, String currentPassword, String newPassword, String confirmNewPassword) {
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new RuntimeException("New password and confirmation do not match");
+        }
+
+        User user = findById(id);
+
+        if (!user.getPassword().equals(currentPassword)) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPassword(newPassword);
+        return user;
     }
 }
