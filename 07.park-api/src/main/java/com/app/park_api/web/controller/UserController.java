@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.park_api.entity.User;
 import com.app.park_api.service.UserService;
+import com.app.park_api.web.dto.UserCreateDTO;
+import com.app.park_api.web.dto.UserResponseDTO;
+import com.app.park_api.web.dto.mapper.UserMapper;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,15 +27,16 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity<UserResponseDTO> create(@RequestBody UserCreateDTO createDTO) {
+        User user = UserMapper.toUser(createDTO);
         user = userService.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(user));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
         User user = userService.findById(id);
-        return ResponseEntity.ok().body(user);
+        return ResponseEntity.ok().body(UserMapper.toDTO(user));
     }
 
     @PatchMapping("/{id}")
@@ -42,9 +46,9 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAll() {
+    public ResponseEntity<List<UserResponseDTO>> getAll() {
         List<User> users = userService.findAll();
-        return ResponseEntity.ok().body(users);
+        return ResponseEntity.ok().body(UserMapper.toListDTO(users));
     }
 
 }
