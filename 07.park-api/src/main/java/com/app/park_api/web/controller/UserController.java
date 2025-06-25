@@ -20,6 +20,8 @@ import com.app.park_api.web.dto.UserPasswordDTO;
 import com.app.park_api.web.dto.UserResponseDTO;
 import com.app.park_api.web.dto.mapper.UserMapper;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -28,7 +30,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> create(@RequestBody UserCreateDTO createDTO) {
+    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserCreateDTO createDTO) {
         User user = UserMapper.toUser(createDTO);
         user = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(user));
@@ -41,7 +43,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody UserPasswordDTO dto) {
+    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @Valid @RequestBody UserPasswordDTO dto) {
         userService.udpatePassword(id, dto.getCurrentPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
         return ResponseEntity.noContent().build();
     }
