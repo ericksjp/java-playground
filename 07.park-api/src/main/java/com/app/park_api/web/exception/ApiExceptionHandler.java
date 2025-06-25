@@ -45,7 +45,7 @@ public class ApiExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorMessage(request, HttpStatus.UNPROCESSABLE_ENTITY, er.getMessage()));
+                .body(new ErrorMessage(request, HttpStatus.CONFLICT, er.getMessage()));
     }
 
 
