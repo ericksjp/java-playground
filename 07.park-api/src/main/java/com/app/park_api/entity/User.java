@@ -4,8 +4,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +24,7 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor
 @Entity(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
 
     @Id
@@ -30,12 +38,16 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_CLIENT;
 
+    @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @CreatedBy
     @Column(name = "created_by", length = 100)
     private String createdBy;
+    @LastModifiedBy
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
 
