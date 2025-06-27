@@ -23,10 +23,11 @@ import com.app.park_api.web.dto.mapper.UserMapper;
 import com.app.park_api.web.exception.ErrorMessage;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -65,11 +66,16 @@ public class UserController {
 
     @Operation(
         summary = "Retrieve user by ID",
-        description = "Endpoint to fetch a user's details using their unique ID.",
+        description = "Requires a Bearer token for authentication. Access restricted to ADMIN|CLIENT.",
+        security = @SecurityRequirement(name = "security"),
         responses = {
             @ApiResponse(
                 responseCode = "200", description = "User details retrieved successfully.",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))
+            ),
+            @ApiResponse(
+                responseCode = "403", description = "User does not have permission to view this resource.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
             ),
             @ApiResponse(
                 responseCode = "404", description = "User not found for the given ID.",
@@ -86,13 +92,18 @@ public class UserController {
 
     @Operation(
         summary = "Update user password",
-        description = "Endpoint to update a user's password.",
+        description = "Requires a Bearer token for authentication. Access restricted to ADMIN|CLIENT.",
+        security = @SecurityRequirement(name = "security"),
         responses = {
             @ApiResponse(
                 responseCode = "204", description = "Password updated successfully"
             ),
             @ApiResponse(
                 responseCode = "400", description = "Password confirmation mismatch.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
+            ),
+            @ApiResponse(
+                responseCode = "403", description = "User does not have permission to view this resource.",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
             ),
             @ApiResponse(
@@ -114,7 +125,8 @@ public class UserController {
 
     @Operation(
         summary = "List all users",
-        description = "Endpoint to retrieve a list of all registered users.",
+        description = "Requires a Bearer token for authentication. Access restricted to ADMIN.",
+        security = @SecurityRequirement(name = "security"),
         responses = {
             @ApiResponse(
                 responseCode = "200", description = "List of users retrieved successfully",
@@ -122,7 +134,11 @@ public class UserController {
                     mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class))
                 )
-            )
+            ),
+            @ApiResponse(
+                responseCode = "403", description = "User does not have permission to view this resource.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
+            ),
         }
     )
     @GetMapping
