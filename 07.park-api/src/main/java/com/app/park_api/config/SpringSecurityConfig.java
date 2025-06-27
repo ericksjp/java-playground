@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.app.park_api.jwt.JwtAuthenticationEntrypoint;
 import com.app.park_api.jwt.JwtAuthorizationFilter;
 
 // EnableMethodSecurity restrict access to specific service methods within the application
@@ -42,6 +43,10 @@ public class SpringSecurityConfig {
             // add filters to the chain to be executed before this one
             .addFilterBefore(
                 jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class
+            )
+            // use the JwtAuthenticationEntrypoint whenever the request is unauthorized
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
             ).build();
     }
 
