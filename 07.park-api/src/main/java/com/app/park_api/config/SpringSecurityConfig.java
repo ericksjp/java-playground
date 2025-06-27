@@ -34,6 +34,7 @@ public class SpringSecurityConfig {
             // filter the acess per endpoint
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "api/v1/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/v1/auth").permitAll()
                 .anyRequest().authenticated()
             )
             // set restfull policy
@@ -45,7 +46,7 @@ public class SpringSecurityConfig {
     }
 
     @Bean
-    private JwtAuthorizationFilter jwtAuthorizationFilter() {
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
         return new JwtAuthorizationFilter();
     }
 
