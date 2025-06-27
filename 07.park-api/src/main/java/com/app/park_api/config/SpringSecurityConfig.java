@@ -12,6 +12,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.app.park_api.jwt.JwtAuthorizationFilter;
 
 // EnableMethodSecurity restrict access to specific service methods within the application
 
@@ -35,7 +38,15 @@ public class SpringSecurityConfig {
             )
             // set restfull policy
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .build();
+            // add filters to the chain to be executed before this one
+            .addFilterBefore(
+                jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class
+            ).build();
+    }
+
+    @Bean
+    private JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter();
     }
 
     @Bean
