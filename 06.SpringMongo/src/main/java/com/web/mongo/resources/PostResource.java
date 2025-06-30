@@ -25,7 +25,9 @@ public class PostResource {
     public ResponseEntity<List<Post>> findAll(
         @RequestParam (required = false, name = "text") String text,
         @RequestParam (required = false, name = "minDate") String minDate,
-        @RequestParam (required = false, name = "maxDate") String maxDate
+        @RequestParam (required = false, name = "maxDate") String maxDate,
+        @RequestParam (required = false, name = "page", defaultValue = "0") Integer page,
+        @RequestParam (required = false, name = "size", defaultValue = "20") Integer PageSize
     ) {
         text = URL.decodeURL(text);
         minDate = URL.decodeURL(minDate);
@@ -36,7 +38,7 @@ public class PostResource {
 
         parsedMaxDate = parsedMaxDate == null ? null : parsedMaxDate.plusDays(1);
 
-        List<Post> posts = postService.findAll(text, parsedMinDate, parsedMaxDate);
+        List<Post> posts = postService.findAll(text, parsedMinDate, parsedMaxDate, page, PageSize);
 
         return ResponseEntity.ok().body(posts);
     }
