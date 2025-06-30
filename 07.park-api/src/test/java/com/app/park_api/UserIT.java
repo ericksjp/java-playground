@@ -193,22 +193,22 @@ public class UserIT {
     }
 
     @Test
-    public void updatePassword_WithNonRegisteredId_ReturnErrorMessageWithStatus404() {
-        Long id = 99L;
+    public void updatePassword_WithUnauthorizedUser_ReturnErrorMessageWithStatus403() {
         UserPasswordDTO updateDTO = new UserPasswordDTO("123456", "101010", "101010");
 
         ErrorMessage responseBody = testClient
                 .patch()
-                .uri("/api/v1/users/" + id)
+                .uri("/api/v1/users/" + users.get("jorge").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateDTO)
                 .exchange()
-                .expectStatus().isEqualTo(404)
+                .expectStatus().isEqualTo(403)
                 .expectBody(ErrorMessage.class)
                 .returnResult().getResponseBody();
 
         Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody.getStatus()).isEqualTo(404);
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
     }
 
     @Test
