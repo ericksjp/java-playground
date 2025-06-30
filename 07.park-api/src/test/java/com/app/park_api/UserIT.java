@@ -1,5 +1,8 @@
 package com.app.park_api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +13,23 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.app.park_api.web.dto.UserCreateDTO;
-import com.app.park_api.web.dto.UserResponseDTO;
 import com.app.park_api.web.dto.UserPasswordDTO;
+import com.app.park_api.web.dto.UserResponseDTO;
 import com.app.park_api.web.exception.ErrorMessage;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/sql/users/users-insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sql/users/users-delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserIT {
+
+    private record User(Long id, String email, String password, String role) {}
+    private static Map<String, User> users = new HashMap<>();
+
+    public UserIT() {
+        users.put("erick", new User(100L, "erick@mail.com", "123456", "ADMIN"));
+        users.put("maria", new User(101L, "maria@mail.com", "123456", "CLIENT"));
+        users.put("jorge", new User(102L, "jorge@mail.com", "123456", "CLIENT"));
+    }
 
     @Autowired
     WebTestClient testClient;
@@ -110,16 +122,10 @@ public class UserIT {
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(409);
     }
 
-    private record User(Long id, String email, String password, String role) {}
-    private static User[] users = {
-            new User(100L, "erick@mail.com", "123456", "ADMIN"),
-            new User(101L, "maria@mail.com", "123456", "CLIENT"),
-            new User(102L, "jorge@mail.com", "123456", "CLIENT"),
-    };
-
+    
     @Test
     public void findUserById_WithRegisteredId_ReturnUserWithStatus200() {
-        for (User u : users) {
+        for (User u : users.values()) {
             UserResponseDTO responseBody = testClient
                     .get()
                     .uri("/api/v1/users/" + u.id)
@@ -149,6 +155,23 @@ public class UserIT {
 
         Assertions.assertThat(responseBody).isNotNull();
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(404);
+    }
+
+    @Test
+    public void findUserById_WithClientUserSearchingForClientUser_ReturnErrorMessageWithStatus403() {
+
+        // maria (client) trying to access jorge (client)
+        ErrorMessage responseBody = testClient
+                .get()
+                .uri("/api/v1/users/" + users.get("jorge").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("maria").email, "123456"))
+                .exchange()
+                .expectStatus().isEqualTo(403)
+                .expectBody(ErrorMessage.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
     }
 
     @Test
