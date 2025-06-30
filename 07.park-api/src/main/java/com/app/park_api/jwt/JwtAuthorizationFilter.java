@@ -36,10 +36,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // if token is invalid continue filter chain without auth process
+        // if token is invalid send an error response and stop the filter chain
         if (!JwtUtils.isTokenValid(token)) {
             log.warn("JWT Token is invalid or expired");
-            filterChain.doFilter(request, response);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
