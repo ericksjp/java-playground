@@ -74,13 +74,12 @@ public class UserController {
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))
             ),
             @ApiResponse(
+                responseCode = "401", description = "Unauthorized access. Bearer token is missing or invalid."
+            ),
+            @ApiResponse(
                 responseCode = "403", description = "User does not have permission to view this resource.",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
             ),
-            @ApiResponse(
-                responseCode = "404", description = "User not found for the given ID.",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
-            )
         }
     )
     @GetMapping("/{id}")
@@ -103,11 +102,10 @@ public class UserController {
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
             ),
             @ApiResponse(
-                responseCode = "403", description = "User does not have permission to view this resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
+                responseCode = "401", description = "Unauthorized access. Bearer token is missing or invalid."
             ),
             @ApiResponse(
-                responseCode = "404", description = "User not found for the given ID.",
+                responseCode = "403", description = "User does not have permission to view this resource.",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
             ),
             @ApiResponse(
@@ -134,6 +132,9 @@ public class UserController {
                     mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class))
                 )
+            ),
+            @ApiResponse(
+                responseCode = "401", description = "Unauthorized access. Bearer token is missing or invalid."
             ),
             @ApiResponse(
                 responseCode = "403", description = "User does not have permission to view this resource.",
