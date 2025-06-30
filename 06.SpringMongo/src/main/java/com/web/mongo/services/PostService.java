@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -22,9 +23,9 @@ public class PostService {
     @Autowired
     private MongoTemplate mongoTemplate;
     
-    public List<Post> findAll(@Nullable String text, @Nullable LocalDate minDate, @Nullable LocalDate maxDate) {
+    public List<Post> findAll(@Nullable String text, @Nullable LocalDate minDate, @Nullable LocalDate maxDate, 
+                              @Nullable Integer page, @Nullable Integer pageSize) {
         Query q = new Query();
-        boolean hasCriteria = false;
 
         if (text != null && !text.isEmpty()) {
             Criteria textCriteria = new Criteria().orOperator(
@@ -34,23 +35,26 @@ public class PostService {
             );
 
             q.addCriteria(textCriteria);
-            hasCriteria = true;
         }
 
         if (minDate != null) {
             q.addCriteria(Criteria.where("date").gte(minDate));
-            hasCriteria = true;
         }
 
         if (maxDate != null) {
             q.addCriteria(Criteria.where("date").lte(maxDate));
-            hasCriteria = true;
         }
 
-        if (hasCriteria) {
-            return mongoTemplate.find(q, Post.class);
+        if (page == null || page < 0) {
+            page = 0;
         }
 
-        return postRepository.findAll();
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 20;
+        }
+
+        q.with(PageRequest.of(page, pageSize));
+
+        return mongoTemplate.find(q, Post.class);
     }
 }
