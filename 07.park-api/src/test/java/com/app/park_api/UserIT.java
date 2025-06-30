@@ -110,22 +110,30 @@ public class UserIT {
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(409);
     }
 
+    private record User(Long id, String email, String password, String role) {}
+    private static User[] users = {
+            new User(100L, "erick@mail.com", "123456", "ADMIN"),
+            new User(101L, "maria@mail.com", "123456", "CLIENT"),
+            new User(102L, "jorge@mail.com", "123456", "CLIENT"),
+    };
+
     @Test
     public void findUserById_WithRegisteredId_ReturnUserWithStatus200() {
-        Long id = 100L;
+        for (User u : users) {
+            UserResponseDTO responseBody = testClient
+                    .get()
+                    .uri("/api/v1/users/" + u.id)
+                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, u.email, "123456")) // admin
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody(UserResponseDTO.class)
+                    .returnResult().getResponseBody();
 
-        UserResponseDTO responseBody = testClient
-                .get()
-                .uri("/api/v1/users/" + id)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(UserResponseDTO.class)
-                .returnResult().getResponseBody();
-
-        Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody.getId()).isEqualTo(id);
-        Assertions.assertThat(responseBody.getUsername()).isEqualTo("erick@mail.com");
-        Assertions.assertThat(responseBody.getRole()).isEqualTo("ADMIN");
+            Assertions.assertThat(responseBody).isNotNull();
+            Assertions.assertThat(responseBody.getId()).isEqualTo(u.id);
+            Assertions.assertThat(responseBody.getUsername()).isEqualTo(u.email);
+            Assertions.assertThat(responseBody.getRole()).isEqualTo(u.role);
+        }
     }
 
     @Test
