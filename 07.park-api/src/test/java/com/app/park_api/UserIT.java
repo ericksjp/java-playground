@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -16,6 +17,8 @@ import com.app.park_api.web.dto.UserCreateDTO;
 import com.app.park_api.web.dto.UserPasswordDTO;
 import com.app.park_api.web.dto.UserResponseDTO;
 import com.app.park_api.web.exception.ErrorMessage;
+
+import reactor.core.publisher.Flux;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/sql/users/users-insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -34,6 +37,8 @@ public class UserIT {
     @Autowired
     WebTestClient testClient;
 
+    /*  ----- Test to create user ----- */
+
     @Test
     public void createUser_WithValidUsernameAndPassword_ReturnCreatedUserWith201Status() {
         UserResponseDTO responseBody = testClient
@@ -51,6 +56,24 @@ public class UserIT {
         Assertions.assertThat(responseBody.getId()).isNotNull();
         Assertions.assertThat(responseBody.getUsername()).isEqualTo("wild@mail.com");
         Assertions.assertThat(responseBody.getRole()).isEqualTo("CLIENT");
+    }
+
+    @Test
+    public void createUser_WithDuplicateUsername_ReturnErrorMessageWith409Status() {
+        UserCreateDTO user = new UserCreateDTO("erick@mail.com", "123456");
+
+        ErrorMessage responseBody = testClient
+                .post()
+                .uri("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(user)
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody(ErrorMessage.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(409);
     }
 
     @Test
@@ -104,27 +127,10 @@ public class UserIT {
         }
     }
 
-    @Test
-    public void createUser_WithDuplicateUsername_ReturnErrorMessageWith409Status() {
-        UserCreateDTO user = new UserCreateDTO("erick@mail.com", "123456");
-
-        ErrorMessage responseBody = testClient
-                .post()
-                .uri("/api/v1/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(user)
-                .exchange()
-                .expectStatus().isEqualTo(409)
-                .expectBody(ErrorMessage.class)
-                .returnResult().getResponseBody();
-
-        Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody.getStatus()).isEqualTo(409);
-    }
-
+    /*  ----- Test to find user by id ----- */
     
     @Test
-    public void findUserById_WithRegisteredId_ReturnUserWithStatus200() {
+    public void findUserById_WithAuthenticationToken_ReturnUserWithStatus200() {
         for (User u : users.values()) {
             UserResponseDTO responseBody = testClient
                     .get()
@@ -143,24 +149,25 @@ public class UserIT {
     }
 
     @Test
-    public void findUserById_WithNonRegisteredId_ReturnErrorMessageWithStatus404() {
-
-        ErrorMessage responseBody = testClient
-                .get()
-                .uri("/api/v1/users/99")
+    public void findUserById_WithoutAuthenticationToken_ReturnErrorMessageWithStatus401() {
+            var response = testClient
+                .patch()
+                .uri("/api/v1/users/" + users.get("jorge").id)
+                .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(404)
-                .expectBody(ErrorMessage.class)
-                .returnResult().getResponseBody();
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
 
-        Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody.getStatus()).isEqualTo(404);
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
     }
 
     @Test
-    public void findUserById_WithClientUserSearchingForClientUser_ReturnErrorMessageWithStatus403() {
-
-        // maria (client) trying to access jorge (client)
+    public void findUserById_WhenAccessingOtherUser_ReturnsErrorWithStatus403() {
         ErrorMessage responseBody = testClient
                 .get()
                 .uri("/api/v1/users/" + users.get("jorge").id)
@@ -174,14 +181,16 @@ public class UserIT {
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
     }
 
+    /*  ----- Test to update user password ----- */
+
     @Test
     public void updatePassword_WithValidData_ReturnVoidWithStatus204() {
-        Long id = 100L;
         UserPasswordDTO updateDTO = new UserPasswordDTO("123456", "101010", "101010");
 
         HttpStatusCode response = testClient
                 .patch()
-                .uri("/api/v1/users/" + id)
+                .uri("/api/v1/users/" + users.get("erick").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateDTO)
                 .exchange()
@@ -193,7 +202,52 @@ public class UserIT {
     }
 
     @Test
-    public void updatePassword_WithUnauthorizedUser_ReturnErrorMessageWithStatus403() {
+    public void updatePassword_WithPasswordMismatch_ReturnErrorMessageWithStatus400() {
+        UserPasswordDTO[] data = {
+            new UserPasswordDTO("123457", "101010", "101010"),
+            new UserPasswordDTO("123456", "101010", "101011"),
+        };
+
+        for (UserPasswordDTO dto : data) {
+            ErrorMessage responseBody = testClient
+                    .patch()
+                    .uri("/api/v1/users/" + users.get("erick").id)
+                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(dto)
+                    .exchange()
+                    .expectStatus().isEqualTo(400)
+                    .expectBody(ErrorMessage.class)
+                    .returnResult().getResponseBody();
+
+            Assertions.assertThat(responseBody).isNotNull();
+            Assertions.assertThat(responseBody.getStatus()).isEqualTo(400);
+        }
+    }
+
+    @Test
+    public void updatePassword_WithoutAuthenticationToken_ReturnErrorMessageWithStatus401() {
+        UserPasswordDTO updateDTO = new UserPasswordDTO("123456", "101010", "101010");
+
+        var response = testClient
+                .patch()
+                .uri("/api/v1/users/" + users.get("jorge").id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateDTO)
+                .exchange()
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
+
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
+    }
+
+    @Test
+    public void updatePassword_WhenAccessingOtherUser_ReturnErrorMessageWithStatus403() {
         UserPasswordDTO updateDTO = new UserPasswordDTO("123456", "101010", "101010");
 
         ErrorMessage responseBody = testClient
@@ -212,29 +266,6 @@ public class UserIT {
     }
 
     @Test
-    public void updatePassword_WithPasswordMismatch_ReturnErrorMessageWithStatus400() {
-        UserPasswordDTO[] data = {
-            new UserPasswordDTO("123457", "101010", "101010"),
-            new UserPasswordDTO("123456", "101010", "101011"),
-        };
-
-        for (UserPasswordDTO dto : data) {
-            ErrorMessage responseBody = testClient
-                    .patch()
-                    .uri("/api/v1/users/101")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(dto)
-                    .exchange()
-                    .expectStatus().isEqualTo(400)
-                    .expectBody(ErrorMessage.class)
-                    .returnResult().getResponseBody();
-
-            Assertions.assertThat(responseBody).isNotNull();
-            Assertions.assertThat(responseBody.getStatus()).isEqualTo(400);
-        }
-    }
-
-    @Test
     public void updatePassword_WithInvalidData_ReturnErrorMessageWithStatus422() {
         UserPasswordDTO[] data = {
             new UserPasswordDTO("12345782", "101010", "101010"),
@@ -247,7 +278,8 @@ public class UserIT {
         for (UserPasswordDTO dto : data) {
             ErrorMessage responseBody = testClient
                     .patch()
-                    .uri("/api/v1/users/101")
+                    .uri("/api/v1/users/" + users.get("erick").id)
+                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(dto)
                     .exchange()
@@ -257,37 +289,56 @@ public class UserIT {
 
             Assertions.assertThat(responseBody).isNotNull();
             Assertions.assertThat(responseBody.getStatus()).isEqualTo(422);
-            
         }
     }
 
-    @Test
-    public void getUsers_WithNoParametes_ReturnUsersWith200Status() {
-        UserResponseDTO[] users = {
-            new UserResponseDTO(100L, "erick@mail.com", "ADMIN"),
-            new UserResponseDTO(101L, "maria@mail.com", "CLIENT"),
-            new UserResponseDTO(102L, "jorge@mail.com", "CLIENT"),
-        };
+    /*  ----- Test to get all users ----- */
 
+    @Test
+    public void getUsers_WithAdminUser_ReturnUsersWithStatus200() {
         UserResponseDTO[] responseBody = testClient
                 .get()
                 .uri("/api/v1/users")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, users.get("erick").password))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(UserResponseDTO[].class)
                 .returnResult().getResponseBody();
 
         Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody).hasSize(users.length);
+        Assertions.assertThat(responseBody).hasSize(users.size());
+    }
 
-        for (int i = 0; i < users.length; i++) {
-            UserResponseDTO response = responseBody[i];
-            UserResponseDTO expected = users[i];
+    @Test
+    public void getUsers_WithoutAuthenticationToken_ReturnErrorMessageWithStatus401() {
+        var response = testClient
+                .patch()
+                .uri("/api/v1/users" + users.get("jorge").id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
 
-            Assertions.assertThat(response).isNotNull();
-            Assertions.assertThat(response.getId()).isEqualTo(expected.getId());
-            Assertions.assertThat(response.getUsername()).isEqualTo(expected.getUsername());
-            Assertions.assertThat(response.getRole()).isEqualTo(expected.getRole());
-        }
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
+    }
+
+    @Test
+    public void getUsers_WithClientUser_ReturnErrorMessageWithStatus403() {
+        ErrorMessage response = testClient
+                .get()
+                .uri("/api/v1/users")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("maria").email, users.get("maria").password))
+                .exchange()
+                .expectStatus().isEqualTo(403)
+                .expectBody(ErrorMessage.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getStatus()).isEqualTo(403);
     }
 }
