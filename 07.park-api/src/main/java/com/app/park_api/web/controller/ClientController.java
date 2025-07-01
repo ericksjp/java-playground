@@ -153,4 +153,29 @@ public class ClientController {
         Page<ClientProjection> clients = clientService.findAll(pageable);
         return ResponseEntity.ok(PageableMapper.toDTO(clients));
     }
+
+    @Operation (
+        summary = "Retrieve client details",
+        description = "Requires a Bearer token for authentication. Access restricted to CLIENT.",
+        security = @SecurityRequirement(name = "security"),
+        responses = {
+            @ApiResponse(
+                responseCode = "200", description = "Client details retrieved successfully.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClientResponseDTO.class))
+            ),
+            @ApiResponse(
+                responseCode = "401", description = "Unauthorized access. Bearer token is missing or invalid."
+            ),
+            @ApiResponse(
+                responseCode = "403", description = "Access denied. Only CLIENT can retrieve their own details.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))
+            )
+        }
+    )
+    @GetMapping("/details")
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity <ClientResponseDTO> details(@AuthenticationPrincipal JwtUserDetails userDetails) {
+        Client client = clientService.findByUserId(userDetails.getId());
+        return ResponseEntity.ok(ClientMapper.toDTO(client));
+    }
 }

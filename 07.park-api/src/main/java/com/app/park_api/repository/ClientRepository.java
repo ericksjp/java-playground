@@ -11,4 +11,5 @@ import com.app.park_api.repository.projection.ClientProjection;
 public interface ClientRepository extends JpaRepository<Client, Long> {
     @Query("SELECT c from clients c")
     Page<ClientProjection> findAllPageable(Pageable pageable);
+    Client findByUserId(Long id);
 }
