@@ -25,5 +25,10 @@ public class ClientService {
             throw new CPFUniqueViolationException(String.format("Cpf '%s' already in use", client.getCpf()));
         }
     }
+
+    @Transactional(readOnly = true)
+    public Client findById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("client with id '%d' not found", id)));
+    }
 }
 

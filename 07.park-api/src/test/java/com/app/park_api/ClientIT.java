@@ -144,4 +144,73 @@ public class ClientIT {
                     .expectBody(ErrorMessage.class);
         }
     }
+
+    /* ----- Test find client by ID ----- */
+
+    @Test
+    public void getClientById_WithAdminUser_ReturnClientWith200Status() {
+        String email = users.get("erick").email;
+        String password = users.get("erick").password;
+
+        Long clientId = 102L;
+
+        ClientResponseDTO responseBody = testClient
+                .get()
+                .uri("/api/v1/clients/" + clientId)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ClientResponseDTO.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getId()).isEqualTo(clientId);
+        Assertions.assertThat(responseBody.getName()).isNotEmpty();
+        Assertions.assertThat(responseBody.getCpf()).isNotEmpty();
+    }
+
+    @Test
+    public void getClientById_WithoutAuthenticationToken_ReturnErrorMessageWith401Status() {
+        var response = testClient
+                .get()
+                .uri("/api/v1/clients/100")
+                .exchange()
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
+
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
+    }
+
+    @Test
+    public void getClientById_WithClientRole_ReturnErrorMessageWith403Status() {
+        String email = users.get("maria").email;
+        String password = users.get("maria").password;
+
+        testClient
+                .get()
+                .uri("/api/v1/clients/" + users.get("jorge").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isEqualTo(403)
+                .expectBody(ErrorMessage.class);
+    }
+
+    @Test
+    public void getClientById_WithAdminUser_ClientNotFound_ReturnErrorMessageWith404Status() {
+        String email = users.get("erick").email;
+        String password = users.get("erick").password;
+
+        testClient
+                .get()
+                .uri("/api/v1/clients/999")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isEqualTo(404)
+                .expectBody(ErrorMessage.class);
+    }
 }
