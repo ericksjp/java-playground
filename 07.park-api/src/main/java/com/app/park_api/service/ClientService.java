@@ -2,12 +2,13 @@ package com.app.park_api.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.app.park_api.entity.Client;
 import com.app.park_api.exception.CPFUniqueViolationException;
+import com.app.park_api.exception.ResourceNotFoundException;
 import com.app.park_api.repository.ClientRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class ClientService {
 
     private final ClientRepository repository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Client save(Client client) {
         try {
             return repository.save(client);
