@@ -14,6 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.app.park_api.web.dto.ClientCreateDTO;
 import com.app.park_api.web.dto.ClientResponseDTO;
+import com.app.park_api.web.dto.PageableDTO;
 import com.app.park_api.web.exception.ErrorMessage;
 
 import reactor.core.publisher.Flux;
@@ -26,8 +27,7 @@ public class ClientIT {
     @Autowired
     WebTestClient testClient;
 
-    private record User(Long id, String email, String password, String role) {
-    }
+    private record User(Long id, String email, String password, String role) {}
 
     private static Map<String, User> users = new HashMap<>();
 
@@ -211,6 +211,58 @@ public class ClientIT {
                 .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
                 .exchange()
                 .expectStatus().isEqualTo(404)
+                .expectBody(ErrorMessage.class);
+    }
+
+    /* ----- Test find all clients ----- */
+
+    @Test
+    public void getAllClients_WithAdminUser_ReturnClientsWith200Status() {
+        String email = users.get("erick").email; // Admin user
+        String password = users.get("erick").password;
+
+        PageableDTO responseBody = testClient
+                .get()
+                .uri("/api/v1/clients")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PageableDTO.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getContent()).isNotEmpty();
+        Assertions.assertThat(responseBody.getTotalElements()).isGreaterThan(0);
+    }
+
+    @Test
+    public void getAllClients_WithoutAuthenticationToken_ReturnErrorMessageWith401Status() {
+        var response = testClient
+                .get()
+                .uri("/api/v1/clients")
+                .exchange()
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
+
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
+    }
+
+    @Test
+    public void getAllClients_WithClientRole_ReturnErrorMessageWith403Status() {
+        String email = users.get("maria").email;
+        String password = users.get("maria").password;
+
+        testClient
+                .get()
+                .uri("/api/v1/clients")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isEqualTo(403)
                 .expectBody(ErrorMessage.class);
     }
 }
