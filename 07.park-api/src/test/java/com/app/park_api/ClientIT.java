@@ -265,4 +265,58 @@ public class ClientIT {
                 .expectStatus().isEqualTo(403)
                 .expectBody(ErrorMessage.class);
     }
+
+    /* ----- Test get client details ----- */
+
+    @Test
+    public void getClientDetails_WithClientUser_ReturnClientDetailsWith200Status() {
+        String email = users.get("maria").email;
+        String password = users.get("maria").password;
+
+        System.out.println(email);
+        System.out.println(password);
+
+        ClientResponseDTO responseBody = testClient
+                .get()
+                .uri("/api/v1/clients/details")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ClientResponseDTO.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getCpf()).contains("85015292066");
+    }
+
+    @Test
+    public void getClientDetails_WithoutAuthenticationToken_ReturnErrorMessageWith401Status() {
+        var response = testClient
+                .get()
+                .uri("/api/v1/clients/details")
+                .exchange()
+                .expectStatus().isEqualTo(401)
+                .returnResult(Void.class);
+
+        HttpHeaders headers = response.getResponseHeaders();
+        Assertions.assertThat(headers).isNotNull();
+        Assertions.assertThat(headers.getFirst("www-authenticate")).isEqualTo("Bearer realm=/api/v1/auth");
+
+        Assertions.assertThat(response.getResponseBody()).isInstanceOf(Flux.class);
+        Assertions.assertThat(response.getResponseBody().hasElements().block()).isFalse();
+    }
+
+    @Test
+    public void getClientDetails_WithAdminUser_ReturnErrorMessageWith403Status() {
+        String email = users.get("erick").email;
+        String password = users.get("erick").password;
+
+        testClient
+                .get()
+                .uri("/api/v1/clients/details")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, email, password))
+                .exchange()
+                .expectStatus().isEqualTo(403)
+                .expectBody(ErrorMessage.class);
+    }
 }
