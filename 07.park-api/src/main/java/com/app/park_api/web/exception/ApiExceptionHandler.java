@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.app.park_api.exception.CPFUniqueViolationException;
 import com.app.park_api.exception.InvalidPasswordException;
 import com.app.park_api.exception.ResourceNotFoundException;
 import com.app.park_api.exception.UsernameUniqueViolationException;
@@ -49,7 +50,7 @@ public class ApiExceptionHandler {
     }
 
 
-    @ExceptionHandler(UsernameUniqueViolationException.class)
+    @ExceptionHandler({UsernameUniqueViolationException.class, CPFUniqueViolationException.class})
     public ResponseEntity<ErrorMessage> usernameUniqueViolationException(RuntimeException er, HttpServletRequest request) {
         log.error("Api error - ", er);
         return ResponseEntity
