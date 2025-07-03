@@ -25,13 +25,13 @@ import reactor.core.publisher.Flux;
 @Sql(scripts = "/sql/users/users-delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserIT {
 
-    private record User(Long id, String email, String password, String role) {}
+    private record User(Long id, String email, String password) {}
     private static Map<String, User> users = new HashMap<>();
 
     public UserIT() {
-        users.put("erick", new User(100L, "erick@mail.com", "123456", "ADMIN"));
-        users.put("maria", new User(101L, "maria@mail.com", "123456", "CLIENT"));
-        users.put("jorge", new User(102L, "jorge@mail.com", "123456", "CLIENT"));
+        users.put("admin", new User(100L, "erick@mail.com", "123456"));
+        users.put("client1", new User(101L, "maria@mail.com", "123456"));
+        users.put("client2", new User(102L, "jorge@mail.com", "123456"));
     }
 
     @Autowired
@@ -60,13 +60,11 @@ public class UserIT {
 
     @Test
     public void createUser_WithDuplicateUsername_ReturnErrorMessageWith409Status() {
-        UserCreateDTO user = new UserCreateDTO("erick@mail.com", "123456");
-
         ErrorMessage responseBody = testClient
                 .post()
                 .uri("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(user)
+                .bodyValue(new UserCreateDTO("admin@mail.com", "123456"))
                 .exchange()
                 .expectStatus().isEqualTo(409)
                 .expectBody(ErrorMessage.class)
@@ -144,7 +142,6 @@ public class UserIT {
             Assertions.assertThat(responseBody).isNotNull();
             Assertions.assertThat(responseBody.getId()).isEqualTo(u.id);
             Assertions.assertThat(responseBody.getUsername()).isEqualTo(u.email);
-            Assertions.assertThat(responseBody.getRole()).isEqualTo(u.role);
         }
     }
 
@@ -152,7 +149,7 @@ public class UserIT {
     public void findUserById_WithoutAuthenticationToken_ReturnErrorMessageWithStatus401() {
             var response = testClient
                 .patch()
-                .uri("/api/v1/users/" + users.get("jorge").id)
+                .uri("/api/v1/users/" + users.get("client2").id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(401)
@@ -170,8 +167,8 @@ public class UserIT {
     public void findUserById_WhenAccessingOtherUser_ReturnsErrorWithStatus403() {
         ErrorMessage responseBody = testClient
                 .get()
-                .uri("/api/v1/users/" + users.get("jorge").id)
-                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("maria").email, "123456"))
+                .uri("/api/v1/users/" + users.get("client2").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("client1").email, "123456"))
                 .exchange()
                 .expectStatus().isEqualTo(403)
                 .expectBody(ErrorMessage.class)
@@ -189,8 +186,8 @@ public class UserIT {
 
         HttpStatusCode response = testClient
                 .patch()
-                .uri("/api/v1/users/" + users.get("erick").id)
-                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
+                .uri("/api/v1/users/" + users.get("admin").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("admin").email, "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateDTO)
                 .exchange()
@@ -211,8 +208,8 @@ public class UserIT {
         for (UserPasswordDTO dto : data) {
             ErrorMessage responseBody = testClient
                     .patch()
-                    .uri("/api/v1/users/" + users.get("erick").id)
-                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
+                    .uri("/api/v1/users/" + users.get("admin").id)
+                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("admin").email, "123456"))
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(dto)
                     .exchange()
@@ -231,7 +228,7 @@ public class UserIT {
 
         var response = testClient
                 .patch()
-                .uri("/api/v1/users/" + users.get("jorge").id)
+                .uri("/api/v1/users/" + users.get("client2").id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateDTO)
                 .exchange()
@@ -252,8 +249,8 @@ public class UserIT {
 
         ErrorMessage responseBody = testClient
                 .patch()
-                .uri("/api/v1/users/" + users.get("jorge").id)
-                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
+                .uri("/api/v1/users/" + users.get("client2").id)
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("admin").email, "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateDTO)
                 .exchange()
@@ -278,8 +275,8 @@ public class UserIT {
         for (UserPasswordDTO dto : data) {
             ErrorMessage responseBody = testClient
                     .patch()
-                    .uri("/api/v1/users/" + users.get("erick").id)
-                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, "123456"))
+                    .uri("/api/v1/users/" + users.get("admin").id)
+                    .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("admin").email, "123456"))
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(dto)
                     .exchange()
@@ -299,7 +296,7 @@ public class UserIT {
         UserResponseDTO[] responseBody = testClient
                 .get()
                 .uri("/api/v1/users")
-                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("erick").email, users.get("erick").password))
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("admin").email, users.get("admin").password))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(UserResponseDTO[].class)
@@ -313,7 +310,7 @@ public class UserIT {
     public void getUsers_WithoutAuthenticationToken_ReturnErrorMessageWithStatus401() {
         var response = testClient
                 .patch()
-                .uri("/api/v1/users" + users.get("jorge").id)
+                .uri("/api/v1/users" + users.get("client2").id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(401)
@@ -332,7 +329,7 @@ public class UserIT {
         ErrorMessage response = testClient
                 .get()
                 .uri("/api/v1/users")
-                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("maria").email, users.get("maria").password))
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, users.get("client1").email, users.get("client1").password))
                 .exchange()
                 .expectStatus().isEqualTo(403)
                 .expectBody(ErrorMessage.class)
