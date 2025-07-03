@@ -43,8 +43,8 @@ public class SpringSecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             // filter the acess per endpoint
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "api/v1/users").permitAll()
-                .requestMatchers(HttpMethod.POST, "api/v1/auth").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth").permitAll()
                 .requestMatchers(DOCUMENTATION_OPENAPI).permitAll()
                 .anyRequest().authenticated()
             )
@@ -54,7 +54,7 @@ public class SpringSecurityConfig {
             .addFilterBefore(
                 jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class
             )
-            // use the JwtAuthenticationEntrypoint whenever the request is unauthorized
+            // call this if an error occurs in the chain and its not handled by any filter or controller advice
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
             ).build();
