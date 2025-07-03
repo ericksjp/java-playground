@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.app.park_api.exception.CPFUniqueViolationException;
 import com.app.park_api.exception.InvalidPasswordException;
 import com.app.park_api.exception.ResourceNotFoundException;
+import com.app.park_api.exception.SpotCodeUniqueViolationException;
 import com.app.park_api.exception.UsernameUniqueViolationException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +51,7 @@ public class ApiExceptionHandler {
     }
 
 
-    @ExceptionHandler({UsernameUniqueViolationException.class, CPFUniqueViolationException.class})
+    @ExceptionHandler({UsernameUniqueViolationException.class, CPFUniqueViolationException.class, SpotCodeUniqueViolationException.class})
     public ResponseEntity<ErrorMessage> usernameUniqueViolationException(RuntimeException er, HttpServletRequest request) {
         log.error("Api error - ", er);
         return ResponseEntity
