@@ -1,6 +1,5 @@
 package com.app.park_api.service;
 
-import com.app.park_api.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +16,7 @@ public class ClientSpotService {
     @Autowired
     private ClientSpotRepository repository;
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @Transactional
     public ClientSpot save(ClientSpot clientSpot) {
@@ -36,16 +35,13 @@ public class ClientSpotService {
 
     @Transactional(readOnly = true)
     public Page<ClientSpotProjection> getByClientId(Long id, Pageable pageable) {
-        String clientCpf = clientRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("client with id '%d' not found", id)))
-                .getCpf();
-
-        return repository.findAllByClientCpf(clientCpf, pageable);
+        clientService.findById(id);
+        return repository.findAllByClientId(id, pageable);
     }
 
     @Transactional(readOnly = true)
     public Page<ClientSpotProjection> getByClientCpf(String cpf, Pageable pageable) {
+        clientService.findByCpf(cpf);
         return repository.findAllByClientCpf(cpf, pageable);
     }
 
