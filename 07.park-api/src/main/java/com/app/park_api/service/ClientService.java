@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.park_api.entity.Client;
-import com.app.park_api.exception.CPFUniqueViolationException;
 import com.app.park_api.exception.ResourceNotFoundException;
+import com.app.park_api.exception.ResourceUniqueViolationException;
 import com.app.park_api.repository.ClientRepository;
 import com.app.park_api.repository.projection.ClientProjection;
 
@@ -25,13 +25,13 @@ public class ClientService {
         try {
             return repository.save(client);
         } catch (DataIntegrityViolationException e) {
-            throw new CPFUniqueViolationException(String.format("Cpf '%s' already in use", client.getCpf()));
+            throw new ResourceUniqueViolationException("client", "cpf", client.getCpf());
         }
     }
 
     @Transactional(readOnly = true)
     public Client findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("client with id '%d' not found", id)));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("client", "id" , id.toString()));
     }
 
     @Transactional(readOnly = true)
@@ -46,6 +46,6 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public Client findByCpf(String cpf) {
-        return repository.findByCpf(cpf).orElseThrow(() -> new ResourceNotFoundException(String.format("client with cpf '%s' not found", cpf)));
+        return repository.findByCpf(cpf).orElseThrow(() -> new ResourceNotFoundException("client", "cpf", cpf));
     }
 }

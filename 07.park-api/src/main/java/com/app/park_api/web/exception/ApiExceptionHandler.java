@@ -12,11 +12,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.app.park_api.exception.CPFUniqueViolationException;
 import com.app.park_api.exception.InvalidPasswordException;
 import com.app.park_api.exception.ResourceNotFoundException;
-import com.app.park_api.exception.SpotCodeUniqueViolationException;
-import com.app.park_api.exception.UsernameUniqueViolationException;
+import com.app.park_api.exception.ResourceUniqueViolationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -68,22 +66,32 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorMessage> resourceNotFoundException(ResourceNotFoundException er, HttpServletRequest request) {
         log.error("Api error - ", er);
+        String message = messageSource.getMessage(
+                ResourceNotFoundException.templateKey,
+                new Object[]{er.getResource(), er.getField(), er.getValue()},
+                request.getLocale()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorMessage(request, HttpStatus.NOT_FOUND, er.getMessage()));
+                .body(new ErrorMessage(request, HttpStatus.NOT_FOUND, message));
     }
 
-
-    @ExceptionHandler({UsernameUniqueViolationException.class, CPFUniqueViolationException.class, SpotCodeUniqueViolationException.class})
-    public ResponseEntity<ErrorMessage> usernameUniqueViolationException(RuntimeException er, HttpServletRequest request) {
+    @ExceptionHandler(ResourceUniqueViolationException.class)
+    public ResponseEntity<ErrorMessage> usernameUniqueViolationException(ResourceUniqueViolationException er, HttpServletRequest request) {
         log.error("Api error - ", er);
+        String message = messageSource.getMessage(
+                ResourceUniqueViolationException.templateKey,
+                new Object[]{er.getResource(), er.getField(), er.getValue()},
+                request.getLocale()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorMessage(request, HttpStatus.CONFLICT, er.getMessage()));
+                .body(new ErrorMessage(request, HttpStatus.CONFLICT, message));
     }
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorMessage> methodArgumentNotValidException(
