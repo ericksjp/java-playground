@@ -20,7 +20,7 @@ public class ClientService {
 
     private final ClientRepository repository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Client save(Client client) {
         try {
             return repository.save(client);
@@ -44,5 +44,8 @@ public class ClientService {
         return repository.findByUserId(id);
     }
 
+    @Transactional(readOnly = true)
+    public Client findByCpf(String cpf) {
+        return repository.findByCpf(cpf).orElseThrow(() -> new ResourceNotFoundException(String.format("client with cpf '%s' not found", cpf)));
+    }
 }
-
