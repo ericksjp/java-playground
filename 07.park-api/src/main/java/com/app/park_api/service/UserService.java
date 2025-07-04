@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.app.park_api.entity.User;
 import com.app.park_api.exception.InvalidPasswordException;
 import com.app.park_api.exception.ResourceNotFoundException;
-import com.app.park_api.exception.UsernameUniqueViolationException;
+import com.app.park_api.exception.ResourceUniqueViolationException;
 import com.app.park_api.repository.UserRepository;
 
 @Service
@@ -28,13 +28,13 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             return repository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new UsernameUniqueViolationException(String.format("username '%s' already in use", user.getUsername()));
+            throw new ResourceUniqueViolationException("user", "username", user.getUsername());
         }
     }
 
     @Transactional(readOnly = true)
     public User findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("user with id '%d' not found", id)));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user", "id", id.toString()));
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +60,6 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
-        return repository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException(String.format("user with username '%s' not found", username)));
+        return repository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
     }
 }

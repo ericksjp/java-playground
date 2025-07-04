@@ -25,7 +25,7 @@ public class ClientSpotService {
 
     @Transactional(readOnly = true)
     public ClientSpot getByReceipt(String receipt) {
-        return repository.findByReceiptAndCheckOutIsNull(receipt).orElseThrow(() -> new ResourceNotFoundException(String.format("Parking with receipt '%s' not available for checkout", receipt)));
+        return repository.findByReceiptAndCheckOutIsNull(receipt).orElseThrow(() -> new ResourceNotFoundException("clientSpot", "receipt", receipt));
     }
 
     @Transactional(readOnly = true)

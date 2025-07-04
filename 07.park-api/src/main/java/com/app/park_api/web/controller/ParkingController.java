@@ -250,7 +250,7 @@ public class ParkingController {
 
         // throw a 404 for safety
         if (user.getRole().equals(Role.ROLE_CLIENT.name()) && user.getId() != clientSpot.getClient().getId()) {
-            throw new ResourceNotFoundException(String.format("Parking with receipt '%s' not found", receipt));
+            throw new ResourceNotFoundException("Parking", "receipt", receipt);
         }
 
         return ResponseEntity.ok(ClientSpotMapper.toDTO(clientSpot));
