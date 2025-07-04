@@ -38,9 +38,6 @@ public class ParkingSpotIT {
         users.put("admin", new User(100L, "erick@mail.com", null, "123456", null, 0));
         users.put("client1", new User(101L, "maria@mail.com","Maria Maria", "123456", "85015292066", 1));
         users.put("client2", new User(102L, "jorge@mail.com","Jorge Jorge", "123456", "23168131008", 1));
-        users.put("client3", new User(103L, "bob@mail.com","Bob Bob", "123456", "64657980009", 1));
-        users.put("client4", new User(104L, "lucia@mail.com","Lucia Lucia", "123456", "16908810038", 1));
-        users.put("client5", new User(105L, "gideon@mail.com","Gideon Gideon", "123456", "45562459078", 1));
     }
 
     @Autowired

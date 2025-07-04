@@ -1,3 +1,3 @@
+DELETE FROM spots;
 DELETE FROM clients;
 DELETE FROM users;
-DELETE FROM spots;
