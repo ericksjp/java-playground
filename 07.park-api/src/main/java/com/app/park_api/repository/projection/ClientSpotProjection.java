@@ -11,8 +11,9 @@ public interface ClientSpotProjection {
     String getmodel();
     String getbrand();
     String getcolor();
+    String getClientCpf();
     String getreceipt();
-    String getspotCode();
+    String getSpotCode();
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     @JsonProperty("check_in")

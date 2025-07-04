@@ -11,8 +11,12 @@ import com.app.park_api.entity.ClientSpot;
 import com.app.park_api.repository.projection.ClientSpotProjection;
 
 public interface ClientSpotRepository extends JpaRepository<ClientSpot, Long> {
-    @Query("SELECT c, u.cpf, s.code FROM ClientSpot c JOIN c.user u JOIN c.spot s")
+    @Query("""
+       SELECT c, cl.cpf AS clientCpf, s.code AS spotCode
+       FROM client_spot c JOIN c.client cl JOIN c.spot s
+       """)
     Page<ClientSpotProjection> findAllPageable(Pageable pageable);
     Optional<ClientSpot> findByReceiptAndCheckOutIsNull(String receipt);
     Page<ClientSpotProjection> findAllByClientCpf(String cpf, Pageable pageable);
+    Page<ClientSpotProjection> findAllByClientId(Long id, Pageable pageable);
 }
