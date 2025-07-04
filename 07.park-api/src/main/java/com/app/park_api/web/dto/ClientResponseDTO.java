@@ -11,5 +11,6 @@ public class ClientResponseDTO {
     private Long id;
     private String name;
     private String cpf;
+    private Integer visits;
 }
 
