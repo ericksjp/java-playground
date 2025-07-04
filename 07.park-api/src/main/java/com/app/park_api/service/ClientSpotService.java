@@ -31,10 +31,7 @@ public class ClientSpotService {
 
     @Transactional(readOnly = true)
     public Page<ClientSpotProjection> getAll(Pageable pageable) {
-        int number = 2;
-        Page<ClientSpotProjection> result =  repository.findAllPageable(pageable);
-        number = 4;
-        return result;
+        return repository.findAllPageable(pageable);
     }
 
     @Transactional(readOnly = true)
