@@ -1,5 +1,6 @@
 package com.app.park_api.web.exception;
 
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,15 @@ import com.app.park_api.exception.SpotCodeUniqueViolationException;
 import com.app.park_api.exception.UsernameUniqueViolationException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    private final MessageSource messageSource;
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorMessage> handleJsonError(HttpMediaTypeNotSupportedException er, HttpServletRequest request) {
@@ -39,7 +44,7 @@ public class ApiExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorMessage(request, HttpStatus.BAD_REQUEST, "Required request body or 'Content-Type' header is missing"));
+                .body(new ErrorMessage(request, HttpStatus.BAD_REQUEST, "invalid request payload"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -90,7 +95,14 @@ public class ApiExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorMessage(request, HttpStatus.UNPROCESSABLE_ENTITY, "invalid fields", result));
+                .body(new ErrorMessage(
+                        request, 
+                        HttpStatus.UNPROCESSABLE_ENTITY, 
+                        messageSource.getMessage("message.invalid.field", null, request.getLocale()),
+                        result, 
+                        messageSource
+                    )
+                );
     }
 
 }
