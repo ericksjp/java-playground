@@ -31,7 +31,10 @@ import com.app.park_api.web.dto.mapper.ClientSpotMapper;
 import com.app.park_api.web.dto.mapper.PageableMapper;
 import com.app.park_api.web.exception.ErrorMessage;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -124,6 +127,23 @@ public class ParkingController {
         summary = "Get parking spots by client CPF",
         description = "Allows an admin to retrieve parking spots associated with a client's CPF.",
         security = @SecurityRequirement(name = "security"),
+        parameters =  {
+            @Parameter(
+                in = ParameterIn.QUERY, name = "page",
+                content = @Content(schema = @Schema(type = "integer", defaultValue = "0")),
+                description = "Page number to retrieve (0-based index)"
+            ),
+            @Parameter(
+                in = ParameterIn.QUERY, name = "size",
+                content = @Content(schema = @Schema(type = "integer", defaultValue = "20")),
+                description = "Number of elements per page"
+            ),
+            @Parameter(
+                in = ParameterIn.QUERY, name = "sort", hidden = true,
+                content = @Content(schema = @Schema(type = "string", defaultValue = "id,asc")),
+                description = "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria can be specified by separating them with commas."
+            )
+        },
         responses = {
             @ApiResponse(
                 responseCode = "200", description = "Parking spots retrieved successfully",
@@ -149,7 +169,7 @@ public class ParkingController {
     @GetMapping("/cpf/{cpf}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageableDTO> getByClientCPF(
-        @PageableDefault(size = 20) Pageable pageable,
+        @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
         @PathVariable String cpf
     ) {
         Page<ClientSpotProjection> clientSpots = clientSpotService.getByClientCpf(cpf, pageable);
@@ -161,6 +181,23 @@ public class ParkingController {
         summary = "Get all parking spots",
         description = "Allows an admin to retrieve all parking spots and a client to retrieve their own parking spots.",
         security = @SecurityRequirement(name = "security"),
+        parameters =  {
+            @Parameter(
+                in = ParameterIn.QUERY, name = "page",
+                content = @Content(schema = @Schema(type = "integer", defaultValue = "0")),
+                description = "Page number to retrieve (0-based index)"
+            ),
+            @Parameter(
+                in = ParameterIn.QUERY, name = "size",
+                content = @Content(schema = @Schema(type = "integer", defaultValue = "20")),
+                description = "Number of elements per page"
+            ),
+            @Parameter(
+                in = ParameterIn.QUERY, name = "sort", hidden = true,
+                content = @Content(schema = @Schema(type = "string", defaultValue = "id,asc")),
+                description = "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria can be specified by separating them with commas."
+            )
+        },
         responses = {
             @ApiResponse(
                 responseCode = "200", description = "Parking spots retrieved successfully",
@@ -174,7 +211,7 @@ public class ParkingController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public ResponseEntity<PageableDTO> getAll(
-        @PageableDefault(size = 20) Pageable pageable,
+        @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
         @AuthenticationPrincipal JwtUserDetails user
     ) {
         Page<ClientSpotProjection> clientSpots;
