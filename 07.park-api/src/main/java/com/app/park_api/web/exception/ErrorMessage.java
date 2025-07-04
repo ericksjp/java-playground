@@ -3,6 +3,7 @@ package com.app.park_api.web.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -41,6 +42,24 @@ public class ErrorMessage {
         this.statusText = status.getReasonPhrase();
         this.message = message;
         addErrors(result);
+    }
+
+    public ErrorMessage(HttpServletRequest request, HttpStatus status, String message, BindingResult result, MessageSource messageSource) {
+        this.path = request.getRequestURI();
+        this.method = request.getMethod();
+        this.status = status.value();
+        this.statusText = status.getReasonPhrase();
+        this.message = message;
+        addErrors(result, messageSource, request.getLocale());
+    }
+
+    private void addErrors(BindingResult result, MessageSource messageSource, java.util.Locale locale) {
+        this.errors = new HashMap<>();
+        for (FieldError fieldError : result.getFieldErrors()) {
+            String code = fieldError.getCodes()[0];
+            String message = messageSource.getMessage(code, fieldError.getArguments(), locale);
+            this.errors.put(fieldError.getField(), message);
+        }
     }
 
     private void addErrors(BindingResult result) {

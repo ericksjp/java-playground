@@ -10,11 +10,11 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class SpotCreateDTO {
-    @NotBlank
-    @Size(max = 4, min = 4, message = "Code must be exactly 4 characters long")
+    @NotBlank(message = "{NotBlank.spotCreateDTO.code}")
+    @Size(max = 4, min = 4, message = "{Size.spotCreateDTO.code}")
     private String code;
 
-    @NotBlank
-    @Pattern(regexp = "(?i)FREE|OCCUPIED", message = "Status must be either 'FREE' or 'OCCUPIED'")
+    @NotBlank(message = "{NotBlank.spotCreateDTO.status}")
+    @Pattern(regexp = "(?i)FREE|OCCUPIED", message = "{Pattern.spotCreateDTO.status}")
     private String status;
 }
