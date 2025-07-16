@@ -1,0 +1,13 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: mscards
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://cursoms-eureka-user:ecok-usr-eeuramssur@localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}

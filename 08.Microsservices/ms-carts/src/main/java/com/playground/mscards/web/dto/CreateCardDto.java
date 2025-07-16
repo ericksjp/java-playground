@@ -1,0 +1,16 @@
+package com.playground.mscards.web.dto;
+
+import com.playground.mscards.entity.CardBrant;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+public class CreateCardDto {
+    private String name;
+    private CardBrant brand;
+    private Double income;
+    private Double limit;
+}
