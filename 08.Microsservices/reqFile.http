@@ -1,0 +1,14 @@
+@url = "http://localhost:8080/clients"
+
+POST {{url}}
+Content-Type: application/json
+Content-Type: application/json
+
+{
+    "name": "erick",
+    "cpf": "12345678900",
+    "age": 30
+}
+
+###
+

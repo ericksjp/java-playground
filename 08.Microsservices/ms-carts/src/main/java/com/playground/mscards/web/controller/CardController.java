@@ -39,10 +39,10 @@ public class CardController {
         return ResponseEntity.created(locationHeader).build();
     }
 
-    public ResponseEntity<List<ResponseCardDto>> findByIncomeLessThan(
+    public ResponseEntity<List<ResponseCardDto>> findByIncomeGreatherThan(
         @RequestParam(required = true) Double value
     ) {
-        List<Card> cards = cardService.findByIncomeLessThan(value);
+        List<Card> cards = cardService.getByIncomeGreatherThane(value);
 
         return ResponseEntity.ok(CardMapper.toDtoList(cards));
     }
