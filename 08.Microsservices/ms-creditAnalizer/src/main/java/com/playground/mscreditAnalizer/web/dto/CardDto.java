@@ -1,6 +1,4 @@
-package com.playground.mscards.web.dto;
-
-import com.playground.mscards.entity.Card.Brant;
+package com.playground.mscreditAnalizer.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,9 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class CreateCardDto {
+public class CardDto {
+    private Long id;
     private String name;
-    private Brant brand;
-    private Double income;
+    private String brand;
     private Double creditLimit;
 }

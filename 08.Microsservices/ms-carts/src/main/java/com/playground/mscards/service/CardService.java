@@ -18,8 +18,8 @@ public class CardService {
         return cardRepository.save(cart);
     }
 
-    public List<Card> findByIncomeLessThan(Double value) {
-        return cardRepository.findByIncomeLessThan(value);
+    public List<Card> getByIncomeGreatherThane(Double value) {
+        return cardRepository.findByIncomeGreaterThanEqual(value);
     }
     
 }
