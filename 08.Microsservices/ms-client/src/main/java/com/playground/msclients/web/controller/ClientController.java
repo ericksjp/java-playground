@@ -19,10 +19,12 @@ import com.playground.msclients.web.mappper.ClientMapper;
 import com.playground.msclients.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/clients")
+@Slf4j
 public class ClientController {
     private final ClientService clienteService;
 
@@ -38,15 +40,15 @@ public class ClientController {
             .buildAndExpand(cliente.getCpf())
             .toUri();
 
-
         return ResponseEntity.created(locationHeader).build();
     }
 
-    @GetMapping("/{cpf}")
-    public ResponseEntity<?> findByCpf(@RequestParam String cpf) {
+    @GetMapping(params = "cpf")
+    public ResponseEntity<?> findByCpf(@RequestParam(required = true) String cpf) {
         try {
             Client cliente = clienteService.findByCpf(cpf);
             ClienteResponseDto responseDto = ClientMapper.toDto(cliente);
+            log.info("Cliente encontrado: {}", responseDto);
             return ResponseEntity.ok(responseDto);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();

@@ -15,7 +15,7 @@ public class ClientCartService {
 
     private final ClientCardRepository clientCartRepository;
 
-    List<ClientCard> getCardsByCpf(String cpf) {
+    public List<ClientCard> getCardsByCpf(String cpf) {
         return clientCartRepository.findByCpf(cpf);
     }
     

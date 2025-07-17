@@ -1,7 +1,8 @@
-@url = "http://localhost:8080/clients"
+@urlclient = "http://localhost:8080/clients"
+@urlcard = "http://localhost:8080/cards"
+@urlcredit = "http://localhost:8080/credit-analizer"
 
-POST {{url}}
-Content-Type: application/json
+POST {{urlclient}}
 Content-Type: application/json
 
 {
@@ -12,3 +13,20 @@ Content-Type: application/json
 
 ###
 
+GET {{urlclient}}?cpf=12345678900
+
+###
+
+POST {{urlcard}}
+Content-Type: application/json
+
+{
+    "name": "Gold Card",
+    "brand": "VISA",
+    "income": 5000,
+    "creditLimit": 2000
+}
+
+###
+
+GET {{urlcredit}}/12345678900
