@@ -18,9 +18,11 @@ import com.playground.mscreditAnalizer.web.dto.ClientDataDto;
 
 import feign.FeignException.FeignClientException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CreditAnalizerService {
     private final ClientResourceClient clientResourceClient;
     private final CardResourceClient cardResourceClient;
