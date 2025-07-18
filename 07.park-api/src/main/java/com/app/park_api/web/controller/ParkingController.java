@@ -31,7 +31,6 @@ import com.app.park_api.web.dto.mapper.ClientSpotMapper;
 import com.app.park_api.web.dto.mapper.PageableMapper;
 import com.app.park_api.web.exception.ErrorMessage;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

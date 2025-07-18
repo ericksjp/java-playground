@@ -11,15 +11,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.web.mongo.domain.Post;
-import com.web.mongo.repositories.PostRepository;
 
 import jakarta.annotation.Nullable;
 
 @Service
 public class PostService {
 
-    @Autowired
-    private PostRepository postRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
     
