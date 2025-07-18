@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   application:
@@ -12,6 +12,11 @@ spring:
               locator:
                 enabled: true
                 lowe-case-service-id: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/bankauthprovider
 
 eureka:
   client:
