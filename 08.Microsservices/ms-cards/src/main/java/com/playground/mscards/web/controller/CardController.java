@@ -13,14 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.playground.mscards.entity.Card;
-import com.playground.mscards.entity.ClientCard;
 import com.playground.mscards.service.CardService;
-import com.playground.mscards.service.ClientCartService;
-import com.playground.mscards.web.dto.ClientCardResponseDto;
 import com.playground.mscards.web.dto.CreateCardDto;
 import com.playground.mscards.web.dto.ResponseCardDto;
 import com.playground.mscards.web.mapper.CardMapper;
-import com.playground.mscards.web.mapper.ClientCardMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/cards")
 public class CardController {
     private final CardService cardService;
-    private final ClientCartService clientCartService;
 
     @PostMapping
     public ResponseEntity<Void> save(@RequestBody CreateCardDto dto) {
@@ -46,12 +41,4 @@ public class CardController {
 
         return ResponseEntity.ok(CardMapper.toDtoList(cards));
     }
-
-    @GetMapping(params = "cpf")
-    public ResponseEntity<List<ClientCardResponseDto>> getCartoesByCliente(
-            @RequestParam("cpf") String cpf){
-        List<ClientCard> cards = clientCartService.getCardsByCpf(cpf);
-        return ResponseEntity.ok(ClientCardMapper.toDtoList(cards));
-    }
-    
 }

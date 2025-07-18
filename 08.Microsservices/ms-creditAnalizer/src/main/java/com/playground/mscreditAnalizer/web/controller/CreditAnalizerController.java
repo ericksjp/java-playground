@@ -6,15 +6,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.playground.mscreditAnalizer.domain.ClientStatus;
 import com.playground.mscreditAnalizer.service.CreditAnalizerService;
 import com.playground.mscreditAnalizer.web.dto.ApprovedCardDto;
+import com.playground.mscreditAnalizer.web.dto.CardIssueDto;
+import com.playground.mscreditAnalizer.web.dto.CardEmissionProtocolDto;
 import com.playground.mscreditAnalizer.web.dto.ClientAvaliationDto;
 
 import lombok.RequiredArgsConstructor;
@@ -37,4 +37,9 @@ public class CreditAnalizerController {
         return ResponseEntity.ok(cards);
     }
 
+    @PostMapping("issue-card")
+    public ResponseEntity<CardEmissionProtocolDto> issueCard(@RequestBody CardIssueDto dto) {
+        CardEmissionProtocolDto protocol = creditAnalizerService.issueCard(dto);
+        return ResponseEntity.ok(protocol);
+    }
 }
