@@ -3,14 +3,12 @@ server:
 
 spring:
   application:
-    name: msclients
-  datasource:
-    url: jdbc:h2:mem:testdb
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
+    name: mscards
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 eureka:
   instance:
@@ -18,7 +16,11 @@ eureka:
   client:
     register-with-eureka: true
     service-url:
-      defaultZone: ${EUREKA_SERVER}
+      defaultZone: http://admin:admin@localhost:8761/eureka
+
+mq:
+  queue:
+    card-issuing-request: card-issuing-request
 
 management:
   endpoints:
