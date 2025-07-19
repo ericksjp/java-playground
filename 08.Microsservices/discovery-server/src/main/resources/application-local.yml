@@ -5,15 +5,15 @@ spring:
     basic:
       enabled: true
     user:
-      name: ${AUTH_USERNAME:admin}
-      password: ${AUTH_PASSWORD:admin} 
+      name: admin
+      password: admin
 
 server:
-  port: ${SERVER_PORT:8761}
+  port: 8761
 
 eureka:
   instance:
-    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    hostname: localhost
   client:
     register-with-eureka: false
     fetch-registry: false
