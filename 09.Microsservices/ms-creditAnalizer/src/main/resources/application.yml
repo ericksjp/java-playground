@@ -1,0 +1,30 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: mscreditanalizer
+  rabbitmq:
+    uri: ${RABBITMQ_SERVER}  
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring-cloud.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER} 
+
+mq:
+  queue:
+    card-issuing-request: ${RABBITMQ_CARD_ISSUE_QUEUE} 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+logging:
+  file:
+    name: ./logs/log-file.log
