@@ -1,1 +1,0 @@
-Tentanto recriar a classe LocalDate.
