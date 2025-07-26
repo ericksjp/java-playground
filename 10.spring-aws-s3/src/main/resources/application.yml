@@ -1,0 +1,16 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: spring-aws-demo
+
+cloud:
+  aws:
+    credentials:
+      accessKey: ${AWS_ACESS_KEY}
+      secretKey: ${AWS_SECRET_KEY} 
+    region:
+      static: ${AWS_REGION}  
+    s3:
+      bucket: ${AWS_BUCKET}
